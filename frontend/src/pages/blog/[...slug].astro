@@ -1,20 +1,29 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import BlogPost from '../../layouts/BlogPost.astro';
+import { fetchPosts, fetchPostByDocumentId } from '../../utils/strapi';
 
-export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+export const getStaticPaths = (async () => {
+	const { data: posts } = await fetchPosts();
 	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
+		params: { slug: post.slug ?? post.documentId },
+		props: { documentId: post.documentId },
 	}));
-}
-type Props = CollectionEntry<'blog'>;
+}) satisfies GetStaticPaths;
 
-const post = Astro.props;
-const { Content } = await render(post);
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { documentId } = Astro.props;
+const { data: post } = await fetchPostByDocumentId(documentId);
 ---
 
-<BlogPost {...post.data}>
-	<Content />
+<BlogPost
+	title={post.title}
+	publishedAt={post.publishedAt}
+	content={post.content}
+	coverImage={post.coverImage}
+	category={post.category}
+	tags={post.tags}
+>
+	<Fragment set:html={post.content ?? ''} />
 </BlogPost>

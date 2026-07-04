@@ -1,10 +1,8 @@
 ---
-import { fetchFromStrapi } from '../utils/strapi';
+import { fetchPosts } from '../utils/strapi';
 
-// Strapiから「posts」の一覧を取得。
-// カテゴリ(category)やタグ(tags)、アイキャッチ(coverImage)も一緒に取るために populate=* を指定します
-const response = await fetchFromStrapi('posts', { query: 'populate=*' });
-const posts = response.data;
+// Strapiから「posts」の一覧を取得（カテゴリ・タグ・アイキャッチ含む）
+const { data: posts } = await fetchPosts();
 ---
 
 <html lang="ja">
@@ -15,6 +13,9 @@ const posts = response.data;
     <style>
       body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
       .post-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+      .post-card h2 { margin-top: 0; }
+      .post-card h2 a { color: #333; text-decoration: none; }
+      .post-card h2 a:hover { text-decoration: underline; color: #0076ff; }
       .meta { color: #666; font-size: 0.9em; }
     </style>
   </head>
@@ -24,14 +25,18 @@ const posts = response.data;
     {posts.length === 0 ? (
       <p>記事がありません。</p>
     ) : (
-      posts.map((post: any) => (
+      posts.map((post) => (
         <div class="post-card">
-          <h2>{post.title}</h2>
+          <h2>
+            <a href={`/blog/${post.slug ?? post.documentId}`}>
+              {post.title}
+            </a>
+          </h2>
           <div class="meta">
-            <span>投稿日: {new Date(post.publishedAt).toLocaleDateString('ja-JP')}</span> | 
-            <span> カテゴリ: {post.category?.name || '未分類'}</span>
+            <span>投稿日: {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('ja-JP') : '未公開'}</span> | 
+            <span> カテゴリ: {post.category?.name ?? '未分類'}</span>
           </div>
-          <p>投稿者: サークル編集部</p> {/* プランBに基づく固定表示 */}
+          <p>投稿者: サークル編集部</p>
         </div>
       ))
     )}
