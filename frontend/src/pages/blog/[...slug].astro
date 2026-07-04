@@ -1,5 +1,5 @@
 ---
-import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import type { GetStaticPaths } from 'astro';
 import BlogPost from '../../layouts/BlogPost.astro';
 import { fetchPosts, fetchPostByDocumentId } from '../../utils/strapi';
 
@@ -10,8 +10,6 @@ export const getStaticPaths = (async () => {
 		props: { documentId: post.documentId },
 	}));
 }) satisfies GetStaticPaths;
-
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { documentId } = Astro.props;
 const { data: post } = await fetchPostByDocumentId(documentId);
@@ -25,5 +23,31 @@ const { data: post } = await fetchPostByDocumentId(documentId);
 	category={post.category}
 	tags={post.tags}
 >
-	<Fragment set:html={post.content ?? ''} />
+	<div class="content">
+		{
+			post.content &&
+				post.content.map((block) => {
+					if (block.type === 'paragraph') {
+						return (
+							<p>
+								{block.children
+									?.map((child) => child.text)
+									.join('')}
+							</p>
+						);
+					}
+					if (block.type === 'heading') {
+						const HeadingTag = `h${block.level || 2}` as any;
+						return (
+							<HeadingTag>
+								{block.children
+									?.map((child) => child.text)
+									.join('')}
+							</HeadingTag>
+						);
+					}
+					return null;
+				})
+		}
+	</div>
 </BlogPost>

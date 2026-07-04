@@ -1,5 +1,5 @@
 ---
-import type { StrapiCategory, StrapiMedia, StrapiTag } from '../types/strapi.types';
+import type { StrapiCategory, StrapiMedia, StrapiTag, StrapiBlock } from '../types/strapi.types';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -8,7 +8,7 @@ import Header from '../components/Header.astro';
 interface Props {
 	title: string;
 	publishedAt: string | null;
-	content: string | null;
+	content: StrapiBlock[] | null;
 	coverImage: StrapiMedia | null;
 	category: StrapiCategory | null;
 	tags: StrapiTag[];
@@ -18,9 +18,16 @@ const { title, publishedAt, content, coverImage, category, tags } = Astro.props;
 
 const strapiUrl = import.meta.env.STRAPI_URL;
 
-// descriptionはコンテンツの先頭120文字から生成（HTMLタグを除去）
+// descriptionはコンテンツの先頭120文字から生成
+const getPlainTextFromBlocks = (blocks: StrapiBlock[] | null): string => {
+	if (!blocks) return '';
+	return blocks
+		.map((block) => block.children?.map((child) => child.text ?? '').join('') ?? '')
+		.join(' ');
+};
+
 const description = content
-	? content.replace(/<[^>]*>/g, '').replace(/[#*_~`]/g, '').trim().slice(0, 120)
+	? getPlainTextFromBlocks(content).trim().slice(0, 120)
 	: title;
 
 // カバー画像のURL（Strapiの相対パスを絶対URLに変換）
@@ -108,7 +115,7 @@ const coverImageUrl = coverImage ? `${strapiUrl}${coverImage.url}` : null;
 						<div class="meta-info">
 							{category && <span>📁 {category.name}</span>}
 							{tags.length > 0 && tags.map((tag) => (
-								<span class="tag">🏷 {tag.name}</span>
+								<span class="tag">🏷 {tag.Name}</span>
 							))}
 						</div>
 						<hr />

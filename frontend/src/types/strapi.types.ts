@@ -44,7 +44,7 @@ interface StrapiBaseEntity {
 export interface StrapiPost extends StrapiBaseEntity {
   title: string;
   slug: string | null;
-  content: string | null;
+  content: StrapiBlock[] | null;
   coverImage: StrapiMedia | null;
   category: StrapiCategory | null;
   tags: StrapiTag[];
@@ -58,7 +58,7 @@ export interface StrapiCategory extends StrapiBaseEntity {
 
 /** Tag — api::tag.tag に対応 */
 export interface StrapiTag extends StrapiBaseEntity {
-  name: string;
+  Name: string;
   slug: string | null;
 }
 
@@ -98,4 +98,25 @@ export interface StrapiMediaFormat {
   height: number;
   size: number;
   url: string;
+}
+
+// ============================
+// Blocks エディタ用型定義
+// ============================
+
+export interface StrapiBlock {
+  type: string;
+  level?: number;
+  format?: string;
+  children?: StrapiBlockChild[];
+}
+
+export interface StrapiBlockChild {
+  type: string;
+  text?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  code?: boolean;
 }
