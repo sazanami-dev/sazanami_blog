@@ -1,17 +1,33 @@
 ---
-import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
+import type { StrapiCategory, StrapiMedia, StrapiTag } from '../types/strapi.types';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface Props {
+	title: string;
+	publishedAt: string | null;
+	content: string | null;
+	coverImage: StrapiMedia | null;
+	category: StrapiCategory | null;
+	tags: StrapiTag[];
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, publishedAt, content, coverImage, category, tags } = Astro.props;
+
+const strapiUrl = import.meta.env.STRAPI_URL;
+
+// descriptionはコンテンツの先頭120文字から生成（HTMLタグを除去）
+const description = content
+	? content.replace(/<[^>]*>/g, '').replace(/[#*_~`]/g, '').trim().slice(0, 120)
+	: title;
+
+// カバー画像のURL（Strapiの相対パスを絶対URLに変換）
+const coverImageUrl = coverImage ? `${strapiUrl}${coverImage.url}` : null;
 ---
 
-<html lang="en">
+<html lang="ja">
 	<head>
 		<BaseHead title={title} description={description} />
 		<style>
@@ -49,8 +65,20 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				margin-bottom: 0.5em;
 				color: rgb(var(--gray));
 			}
-			.last-updated-on {
-				font-style: italic;
+			.meta-info {
+				display: flex;
+				gap: 0.5em;
+				justify-content: center;
+				flex-wrap: wrap;
+				margin-top: 0.5em;
+				font-size: 0.9em;
+				color: rgb(var(--gray));
+			}
+			.tag {
+				background: rgb(var(--gray-light));
+				padding: 0.2em 0.6em;
+				border-radius: 4px;
+				font-size: 0.85em;
 			}
 		</style>
 	</head>
@@ -60,21 +88,29 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<main>
 			<article>
 				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+					{coverImageUrl && (
+						<img
+							width={1020}
+							height={510}
+							src={coverImageUrl}
+							alt={coverImage?.alternativeText ?? ''}
+						/>
+					)}
 				</div>
 				<div class="prose">
 					<div class="title">
 						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
+							{publishedAt && (
+								<FormattedDate date={new Date(publishedAt)} />
+							)}
 						</div>
 						<h1>{title}</h1>
+						<div class="meta-info">
+							{category && <span>📁 {category.name}</span>}
+							{tags.length > 0 && tags.map((tag) => (
+								<span class="tag">🏷 {tag.name}</span>
+							))}
+						</div>
 						<hr />
 					</div>
 					<slot />
