@@ -1,44 +1,172 @@
 ---
+import Layout from '../layouts/Layout.astro';
 import { fetchPosts } from '../utils/strapi';
 
 // Strapiから「posts」の一覧を取得（カテゴリ・タグ・アイキャッチ含む）
 const { data: posts } = await fetchPosts();
+
+const strapiUrl = import.meta.env.STRAPI_URL;
 ---
 
-<html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>サークルブログ</title>
-    <style>
-      body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-      .post-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
-      .post-card h2 { margin-top: 0; }
-      .post-card h2 a { color: #333; text-decoration: none; }
-      .post-card h2 a:hover { text-decoration: underline; color: #0076ff; }
-      .meta { color: #666; font-size: 0.9em; }
-    </style>
-  </head>
-  <body>
-    <h1>サークルブログ</h1>
-    
-    {posts.length === 0 ? (
+<Layout title="Sazanami Blog | 記事一覧">
+  <section class="hero-section">
+    <h1>Sazanami Blog</h1>
+    <p>サークルの活動、開発記録、メンバーによるブログ記事をお届けします。</p>
+  </section>
+
+  {posts.length === 0 ? (
+    <div class="glass-panel no-posts">
       <p>記事がありません。</p>
-    ) : (
-      posts.map((post) => (
-        <div class="post-card">
-          <h2>
-            <a href={`/blog/${post.slug ?? post.documentId}`}>
-              {post.title}
-            </a>
-          </h2>
-          <div class="meta">
-            <span>投稿日: {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('ja-JP') : '未公開'}</span> | 
-            <span> カテゴリ: {post.category?.name ?? '未分類'}</span>
-          </div>
-          <p>投稿者: サークル編集部</p>
-        </div>
-      ))
-    )}
-  </body>
-</html>
+    </div>
+  ) : (
+    <div class="post-grid">
+      {posts.map((post) => {
+        const coverImageUrl = post.coverImage ? `${strapiUrl}${post.coverImage.url}` : null;
+        return (
+          <a href={`/blog/${post.slug ?? post.documentId}`} class="card-link">
+            <article class="glass-panel post-card">
+              {coverImageUrl ? (
+                <div class="card-image" style={`background-image: url(${coverImageUrl})`} />
+              ) : (
+                <div class="card-image fallback-image">
+                  <span>No Image</span>
+                </div>
+              )}
+              <div class="card-body">
+                <div class="card-meta">
+                  {post.category && <span class="category-badge">{post.category.name}</span>}
+                  <span class="pub-date">
+                    {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '未公開'}
+                  </span>
+                </div>
+                <h2 class="card-title">{post.title}</h2>
+                <div class="card-tags">
+                  {post.tags && post.tags.map((tag) => (
+                    <span class="tag-badge">#{tag.Name}</span>
+                  ))}
+                </div>
+              </div>
+            </article>
+          </a>
+        );
+      })}
+    </div>
+  )}
+</Layout>
+
+<style>
+  .hero-section {
+    text-align: center;
+    padding: 4rem 1rem;
+    margin-bottom: 2rem;
+  }
+  .hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-section p {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .no-posts {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+  .card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .post-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.4s ease;
+  }
+  .card-link:hover .post-card {
+    transform: translateY(-6px);
+    border-color: rgba(96, 165, 250, 0.25);
+    box-shadow: 0 12px 40px rgba(96, 165, 250, 0.12);
+  }
+  .card-image {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .fallback-image {
+    background: linear-gradient(135deg, #1c1936 0%, #111827 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+  }
+  .category-badge {
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--accent-blue);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .pub-date {
+    color: var(--text-secondary);
+  }
+  .card-title {
+    font-size: 1.25rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+    flex-grow: 1;
+    color: #fff;
+    transition: color 0.2s ease;
+  }
+  .card-link:hover .card-title {
+    color: var(--accent-blue);
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+  .tag-badge {
+    opacity: 0.85;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section h1 {
+      font-size: 2.5rem;
+    }
+  }
+</style>
