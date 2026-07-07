@@ -4,6 +4,8 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig, fontProviders } from 'astro/config';
 import node from '@astrojs/node';
+import react from '@astrojs/react';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,7 +14,10 @@ export default defineConfig({
 		mode: 'standalone',
 	}),
 	site: 'https://example.com',
-	integrations: [mdx(), sitemap()],
+	integrations: [mdx(), sitemap(), react()],
+	vite: {
+		plugins: [tailwindcss()],
+	},
 	fonts: [
 		{
 			provider: fontProviders.local(),

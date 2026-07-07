@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
 
 interface Props {
 	title: string;
@@ -26,16 +28,10 @@ const { title, description = 'サークルブログ' } = Astro.props;
 		/>
 	</head>
 	<body>
-		<header class="main-header">
-			<div class="header-container">
-				<a href="/" class="logo">Sazanami <span>Blog</span></a>
-			</div>
-		</header>
+		<Header />
 		<main>
 			<slot />
 		</main>
-		<footer class="main-footer">
-			<p>&copy; 2026 Sazanami Blog. All rights reserved.</p>
-		</footer>
+		<Footer />
 	</body>
 </html>
