@@ -1,20 +1,45 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import Layout from '../../layouts/Layout.astro';
+import { BlogPostDetail } from '../../components/BlogPostDetail';
+import { fetchPostBySlug, fetchPostByDocumentId } from '../../utils/strapi';
+import type { StrapiPost } from '../../types/strapi.types';
 
-export async function getStaticPaths() {
-	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
-	}));
+const { slug } = Astro.params;
+
+if (!slug) {
+	return Astro.redirect('/404');
 }
-type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
-const { Content } = await render(post);
+let post: StrapiPost | null = null;
+
+// 1. まずslugとして検索する
+try {
+	const { data: posts } = await fetchPostBySlug(slug);
+	if (posts && posts.length > 0) {
+		post = posts[0];
+	}
+} catch (e) {
+	// Ignore
+}
+
+// 2. 見つからなければ、documentIdとして直接フェッチを試みる
+if (!post) {
+	try {
+		const { data } = await fetchPostByDocumentId(slug);
+		post = data;
+	} catch (e) {
+		// Ignore
+	}
+}
+
+// それでも存在しない場合は404ページへリダイレクト
+if (!post) {
+	return Astro.redirect('/404');
+}
+
+const strapiUrl = import.meta.env.STRAPI_URL;
 ---
 
-<BlogPost {...post.data}>
-	<Content />
-</BlogPost>
+<Layout title={`${post.title} | Sazanami Blog`}>
+  <BlogPostDetail post={post} strapiUrl={strapiUrl} />
+</Layout>
