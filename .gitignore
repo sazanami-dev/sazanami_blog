@@ -1,0 +1,8 @@
+# 環境変数ファイル（秘密情報を含むためコミット禁止）
+.env
+.env.local
+.env.production
+
+# OS固有ファイル
+.DS_Store
+Thumbs.db

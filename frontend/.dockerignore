@@ -1,0 +1,12 @@
+# Docker ビルド時にコンテナにコピーしないファイル群
+node_modules
+.astro
+.env
+.env.local
+.env.production
+dist
+.DS_Store
+.vscode
+*.log
+AGENTS.md
+CLAUDE.md
