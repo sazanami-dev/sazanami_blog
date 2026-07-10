@@ -1,0 +1,51 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: sazanami-backend-dev
+    ports:
+      - "1337:1337"
+    volumes:
+      # ソースコードをマウント
+      - ./backend:/opt/app
+      # コンテナ側のnode_modulesをホスト側と分離
+      - /opt/app/node_modules
+      - ./backend/.tmp:/opt/app/.tmp
+      - ./backend/public/uploads:/opt/app/public/uploads
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=development
+    networks:
+      - dev-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: sazanami-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # ソースコードをマウント
+      - ./frontend:/app
+      # コンテナ側のnode_modulesをホスト側と分離
+      - /app/node_modules
+      # Astroキャッシュの分離
+      - /app/.astro
+    environment:
+      - STRAPI_API_URL=http://backend:1337
+      - STRAPI_PUBLIC_URL=${STRAPI_PUBLIC_URL:-http://localhost:1337}
+      - STRAPI_TOKEN=${STRAPI_TOKEN}
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge

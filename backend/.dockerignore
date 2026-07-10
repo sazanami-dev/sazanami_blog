@@ -1,0 +1,11 @@
+# Docker ビルド時にコンテナにコピーしないファイル群
+node_modules
+.tmp
+.env
+.env.local
+dist
+build
+.strapi
+.strapi-updater.json
+.DS_Store
+*.log

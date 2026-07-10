@@ -1,0 +1,15 @@
+FROM node:20-alpine
+
+RUN apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev python3
+
+WORKDIR /opt/app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+ENV PATH=/opt/app/node_modules/.bin:$PATH
+ENV NODE_ENV=development
+
+EXPOSE 1337
+
+CMD ["npm", "run", "develop"]

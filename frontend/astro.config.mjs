@@ -13,6 +13,10 @@ export default defineConfig({
 	adapter: node({
 		mode: 'standalone',
 	}),
+	server: {
+		port: 3000,
+		host: true,
+	},
 	site: 'https://example.com',
 	integrations: [mdx(), sitemap(), react()],
 	vite: {

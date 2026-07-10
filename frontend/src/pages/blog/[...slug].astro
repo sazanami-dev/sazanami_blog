@@ -37,7 +37,10 @@ if (!post) {
 	return Astro.redirect('/404');
 }
 
-const strapiUrl = import.meta.env.STRAPI_URL;
+const strapiUrl = import.meta.env.STRAPI_PUBLIC_URL
+  || (typeof process !== 'undefined' ? process.env.STRAPI_PUBLIC_URL : undefined)
+  || import.meta.env.STRAPI_URL
+  || (typeof process !== 'undefined' ? process.env.STRAPI_URL : undefined);
 ---
 
 <Layout title={`${post.title} | Sazanami Blog`}>
