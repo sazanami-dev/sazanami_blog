@@ -1,17 +1,9 @@
-# ============================================================
-# Strapi 開発用 Dockerfile
-# ============================================================
-# ホットリロード対応: ソースコードをボリュームマウントして即時反映
-# ============================================================
-
 FROM node:20-alpine
 
-# ネイティブモジュール（better-sqlite3等）のビルドに必要なツール
 RUN apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev python3
 
 WORKDIR /opt/app
 
-# 依存関係のインストール
 COPY package.json package-lock.json ./
 RUN npm install
 

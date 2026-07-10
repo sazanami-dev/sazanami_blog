@@ -1,19 +1,4 @@
-# ============================================================
-# Sazanami Blog - Docker Compose (開発環境)
-# ============================================================
-# 起動コマンド: docker compose -f docker-compose.dev.yml up -d --build
-# 停止コマンド: docker compose -f docker-compose.dev.yml down
-# ============================================================
-# 特徴:
-#   - ソースコードをボリュームマウントし、ホットリロード (HMR) に対応
-#   - ローカルのデータベースと画像をそのまま利用
-#   - 開発サーバー（npm run dev / npm run develop）で起動
-# ============================================================
-
 services:
-  # ----------------------------------------------------------
-  # Strapi CMS (バックエンド / 開発モード)
-  # ----------------------------------------------------------
   backend:
     build:
       context: ./backend
@@ -22,11 +7,10 @@ services:
     ports:
       - "1337:1337"
     volumes:
-      # ソースコードをマウント（ホットリロード対応）
+      # ソースコードをマウント
       - ./backend:/opt/app
-      # コンテナ側のnode_modulesをホスト側と分離（衝突防止）
+      # コンテナ側のnode_modulesをホスト側と分離
       - /opt/app/node_modules
-      # ローカルのDBと画像をそのまま利用
       - ./backend/.tmp:/opt/app/.tmp
       - ./backend/public/uploads:/opt/app/public/uploads
     env_file:
@@ -36,9 +20,6 @@ services:
     networks:
       - dev-network
 
-  # ----------------------------------------------------------
-  # Astro SSR (フロントエンド / 開発モード)
-  # ----------------------------------------------------------
   frontend:
     build:
       context: ./frontend
@@ -47,9 +28,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # ソースコードをマウント（ホットリロード対応）
+      # ソースコードをマウント
       - ./frontend:/app
-      # コンテナ側のnode_modulesをホスト側と分離（衝突防止）
+      # コンテナ側のnode_modulesをホスト側と分離
       - /app/node_modules
       # Astroキャッシュの分離
       - /app/.astro
@@ -65,9 +46,6 @@ services:
     networks:
       - dev-network
 
-# ----------------------------------------------------------
-# ネットワーク
-# ----------------------------------------------------------
 networks:
   dev-network:
     driver: bridge
