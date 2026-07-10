@@ -1,0 +1,73 @@
+# ============================================================
+# Sazanami Blog - Docker Compose (開発環境)
+# ============================================================
+# 起動コマンド: docker compose -f docker-compose.dev.yml up -d --build
+# 停止コマンド: docker compose -f docker-compose.dev.yml down
+# ============================================================
+# 特徴:
+#   - ソースコードをボリュームマウントし、ホットリロード (HMR) に対応
+#   - ローカルのデータベースと画像をそのまま利用
+#   - 開発サーバー（npm run dev / npm run develop）で起動
+# ============================================================
+
+services:
+  # ----------------------------------------------------------
+  # Strapi CMS (バックエンド / 開発モード)
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: sazanami-backend-dev
+    ports:
+      - "1337:1337"
+    volumes:
+      # ソースコードをマウント（ホットリロード対応）
+      - ./backend:/opt/app
+      # コンテナ側のnode_modulesをホスト側と分離（衝突防止）
+      - /opt/app/node_modules
+      # ローカルのDBと画像をそのまま利用
+      - ./backend/.tmp:/opt/app/.tmp
+      - ./backend/public/uploads:/opt/app/public/uploads
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=development
+    networks:
+      - dev-network
+
+  # ----------------------------------------------------------
+  # Astro SSR (フロントエンド / 開発モード)
+  # ----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: sazanami-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # ソースコードをマウント（ホットリロード対応）
+      - ./frontend:/app
+      # コンテナ側のnode_modulesをホスト側と分離（衝突防止）
+      - /app/node_modules
+      # Astroキャッシュの分離
+      - /app/.astro
+    environment:
+      - STRAPI_API_URL=http://backend:1337
+      - STRAPI_PUBLIC_URL=${STRAPI_PUBLIC_URL:-http://localhost:1337}
+      - STRAPI_TOKEN=${STRAPI_TOKEN}
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - dev-network
+
+# ----------------------------------------------------------
+# ネットワーク
+# ----------------------------------------------------------
+networks:
+  dev-network:
+    driver: bridge
