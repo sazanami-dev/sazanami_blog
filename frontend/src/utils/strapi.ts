@@ -16,12 +16,15 @@ async function fetchFromStrapi<T>(
     endpoint: string,
     options: FetchOptions = {},
 ): Promise<T> {
-    const strapiUrl = import.meta.env.STRAPI_URL;
-    const token = import.meta.env.STRAPI_TOKEN;
+    const strapiApiUrl = import.meta.env.STRAPI_API_URL 
+        || (typeof process !== 'undefined' ? process.env.STRAPI_API_URL : undefined)
+        || import.meta.env.STRAPI_URL 
+        || (typeof process !== 'undefined' ? process.env.STRAPI_URL : undefined);
+    const token = import.meta.env.STRAPI_TOKEN || (typeof process !== 'undefined' ? process.env.STRAPI_TOKEN : undefined);
 
     // クエリパラメータがある場合は結合（例: 画像やカテゴリを一緒に取得する populate など）
     const queryString = options.query ? `?${options.query}` : '';
-    const url = `${strapiUrl}/api/${endpoint}${queryString}`;
+    const url = `${strapiApiUrl}/api/${endpoint}${queryString}`;
 
     const response = await fetch(url, {
         headers: {
