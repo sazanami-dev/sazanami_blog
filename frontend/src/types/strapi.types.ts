@@ -109,6 +109,17 @@ export interface StrapiBlock {
   level?: number;
   format?: string;
   children?: StrapiBlockChild[];
+  image?: StrapiBlockImage;
+}
+
+export interface StrapiBlockImage {
+  name: string;
+  alternativeText: string | null;
+  url: string;
+  width?: number;
+  height?: number;
+  mime?: string;
+  size?: number;
 }
 
 export interface StrapiBlockChild {
@@ -119,4 +130,7 @@ export interface StrapiBlockChild {
   underline?: boolean;
   strikethrough?: boolean;
   code?: boolean;
+  children?: StrapiBlockChild[];
+  url?: string;
 }
+
