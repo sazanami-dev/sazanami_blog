@@ -69,3 +69,36 @@ export async function fetchPostByDocumentId(
         { query: 'populate=*' },
     );
 }
+
+// ============================
+// メディア URL ヘルパー
+// ============================
+
+/**
+ * Strapi のメディア URL を公開用 URL に正規化する。
+ *
+ * - 相対パス（例: `/uploads/image.png`）→ strapiUrl を先頭に付与
+ * - 絶対URL（例: `http://localhost:1337/uploads/image.png`）→ ホスト部分を strapiUrl に差し替え
+ *
+ * Blocks エディタ内の画像は絶対URLで保存されるため、
+ * そのまま使うと本番環境で localhost を参照してしまい表示されなくなる。
+ */
+export function resolveMediaUrl(rawUrl: string, strapiUrl: string): string {
+    // 末尾スラッシュを統一的に除去
+    const base = strapiUrl.replace(/\/+$/, '');
+
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+        // 絶対URLからパス部分だけ抽出し、公開用ホストに差し替え
+        try {
+            const { pathname } = new URL(rawUrl);
+            return `${base}${pathname}`;
+        } catch {
+            // URL パースに失敗した場合はそのまま返す
+            return rawUrl;
+        }
+    }
+
+    // 相対パスの場合は公開用ホストを先頭に付与
+    const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
+    return `${base}${path}`;
+}

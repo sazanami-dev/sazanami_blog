@@ -1,4 +1,5 @@
 import type { StrapiPost } from '../types/strapi.types';
+import { resolveMediaUrl } from '../utils/strapi';
 
 interface BlogListProps {
   posts: StrapiPost[];
@@ -24,7 +25,7 @@ export function BlogList({ posts, strapiUrl }: BlogListProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {posts.map((post) => {
-            const coverImageUrl = post.coverImage ? `${strapiUrl}${post.coverImage.url}` : null;
+            const coverImageUrl = post.coverImage ? resolveMediaUrl(post.coverImage.url, strapiUrl) : null;
             const dateStr = post.publishedAt 
               ? new Date(post.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
               : '未公開';
