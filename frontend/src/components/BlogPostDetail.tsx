@@ -1,4 +1,39 @@
-import type { StrapiPost } from '../types/strapi.types';
+import type { StrapiPost, StrapiBlockChild } from '../types/strapi.types';
+import { resolveMediaUrl } from '../utils/strapi';
+
+// インライン要素（太字、斜体、コード、リンクなど）をレンダリングするヘルパー
+function renderInlineChildren(children?: StrapiBlockChild[]) {
+  if (!children) return null;
+  return children.map((child, cIdx) => {
+    if (child.type === 'link' && child.url) {
+      return (
+        <a 
+          key={cIdx} 
+          href={child.url} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-blue-600 hover:text-blue-500 underline transition-colors"
+        >
+          {renderInlineChildren(child.children)}
+        </a>
+      );
+    }
+
+    let classes = '';
+    if (child.bold) classes += ' font-bold';
+    if (child.italic) classes += ' italic';
+    if (child.underline) classes += ' underline';
+    if (child.strikethrough) classes += ' line-through';
+    if (child.code) classes += ' font-mono bg-slate-100 border border-slate-200/50 px-1.5 py-0.5 rounded text-sm text-pink-600';
+    
+    return (
+      <span key={cIdx} className={classes || undefined}>
+        {child.text}
+      </span>
+    );
+  });
+}
+
 
 interface BlogPostDetailProps {
   post: StrapiPost;
@@ -6,7 +41,7 @@ interface BlogPostDetailProps {
 }
 
 export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
-  const coverImageUrl = post.coverImage ? `${strapiUrl}${post.coverImage.url}` : null;
+  const coverImageUrl = post.coverImage ? resolveMediaUrl(post.coverImage.url, strapiUrl) : null;
   const dateStr = post.publishedAt 
     ? new Date(post.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
     : '未公開';
@@ -58,20 +93,7 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
               if (block.type === 'paragraph') {
                 return (
                   <p key={idx} className="mb-6">
-                    {block.children?.map((child, cIdx) => {
-                      let classes = '';
-                      if (child.bold) classes += ' font-bold';
-                      if (child.italic) classes += ' italic';
-                      if (child.underline) classes += ' underline';
-                      if (child.strikethrough) classes += ' line-through';
-                      if (child.code) classes += ' font-mono bg-slate-100 border border-slate-200/50 px-1.5 py-0.5 rounded text-sm text-pink-600';
-                      
-                      return (
-                        <span key={cIdx} className={classes || undefined}>
-                          {child.text}
-                        </span>
-                      );
-                    })}
+                    {renderInlineChildren(block.children)}
                   </p>
                 );
               }
@@ -91,8 +113,64 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
 
                 return (
                   <HeadingTag key={idx} className={headingClass}>
-                    {block.children?.map((child) => child.text).join('')}
+                    {renderInlineChildren(block.children)}
                   </HeadingTag>
+                );
+              }
+              if (block.type === 'list') {
+                const ListTag = block.format === 'ordered' ? 'ol' : 'ul';
+                const listClass = block.format === 'ordered' 
+                  ? 'list-decimal pl-6 mb-6 text-slate-800 space-y-2' 
+                  : 'list-disc pl-6 mb-6 text-slate-800 space-y-2';
+
+                return (
+                  <ListTag key={idx} className={listClass}>
+                    {block.children?.map((item, itemIdx) => {
+                      if (item.type === 'list-item') {
+                        return (
+                          <li key={itemIdx}>
+                            {renderInlineChildren(item.children)}
+                          </li>
+                        );
+                      }
+                      return null;
+                    })}
+                  </ListTag>
+                );
+              }
+              if (block.type === 'quote') {
+                return (
+                  <blockquote key={idx} className="border-l-4 border-slate-300 pl-4 italic my-6 text-slate-600">
+                    {renderInlineChildren(block.children)}
+                  </blockquote>
+                );
+              }
+              if (block.type === 'code') {
+                return (
+                  <pre key={idx} className="bg-slate-950 text-slate-200 p-4 rounded-xl overflow-x-auto my-6 font-mono text-sm border border-slate-800">
+                    <code>
+                      {block.children?.map((child) => child.text).join('')}
+                    </code>
+                  </pre>
+                );
+              }
+              if (block.type === 'image' && block.image) {
+                const imgUrl = resolveMediaUrl(block.image.url, strapiUrl);
+                return (
+                  <div key={idx} className="my-8 flex flex-col items-center">
+                    <img 
+                      src={imgUrl} 
+                      alt={block.image.alternativeText || block.image.name} 
+                      className="rounded-xl max-h-[500px] object-contain shadow-md border border-slate-100"
+                      width={block.image.width}
+                      height={block.image.height}
+                    />
+                    {block.image.alternativeText && (
+                      <span className="text-sm text-slate-500 mt-2">
+                        {block.image.alternativeText}
+                      </span>
+                    )}
+                  </div>
                 );
               }
               return null;
