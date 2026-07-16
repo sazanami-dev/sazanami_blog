@@ -1,4 +1,5 @@
 import type { StrapiPost, StrapiBlockChild } from '../types/strapi.types';
+import { resolveMediaUrl } from '../utils/strapi';
 
 // インライン要素（太字、斜体、コード、リンクなど）をレンダリングするヘルパー
 function renderInlineChildren(children?: StrapiBlockChild[]) {
@@ -40,7 +41,7 @@ interface BlogPostDetailProps {
 }
 
 export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
-  const coverImageUrl = post.coverImage ? `${strapiUrl}${post.coverImage.url}` : null;
+  const coverImageUrl = post.coverImage ? resolveMediaUrl(post.coverImage.url, strapiUrl) : null;
   const dateStr = post.publishedAt 
     ? new Date(post.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
     : '未公開';
@@ -154,9 +155,7 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
                 );
               }
               if (block.type === 'image' && block.image) {
-                const imgUrl = block.image.url.startsWith('http://') || block.image.url.startsWith('https://')
-                  ? block.image.url
-                  : `${strapiUrl}${block.image.url}`;
+                const imgUrl = resolveMediaUrl(block.image.url, strapiUrl);
                 return (
                   <div key={idx} className="my-8 flex flex-col items-center">
                     <img 
