@@ -58,7 +58,9 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
 
       <article className="glass-panel overflow-hidden rounded-2xl">
         {coverImageUrl && (
-          <div className="h-64 md:h-96 bg-cover bg-center border-b border-black/5" style={{ backgroundImage: `url(${coverImageUrl})` }} />
+          <div className="h-80 overflow-hidden border-b border-black/5 bg-slate-50 flex items-center justify-center">
+            <img src={coverImageUrl} alt={post.title} className="max-w-full max-h-full object-contain" />
+          </div>
         )}
         
         <div className="p-6 md:p-12">
