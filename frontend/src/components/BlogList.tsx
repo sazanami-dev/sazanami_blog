@@ -34,7 +34,9 @@ export function BlogList({ posts, strapiUrl }: BlogListProps) {
               <a href={`/blog/${post.slug ?? post.documentId}`} key={post.id} className="block group">
                 <article className="glass-panel h-full flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-500/20 hover:shadow-xl hover:shadow-slate-200/50">
                   {coverImageUrl ? (
-                    <div className="h-44 bg-cover bg-center border-b border-black/5" style={{ backgroundImage: `url(${coverImageUrl})` }} />
+                    <div className="h-48 overflow-hidden border-b border-black/5 bg-slate-50 flex items-center justify-center">
+                      <img src={coverImageUrl} alt={post.title} className="max-w-full max-h-full object-contain" />
+                    </div>
                   ) : (
                     <div className="h-44 bg-gradient-to-br from-blue-50 to-indigo-100 flex justify-center items-center text-blue-500/30 font-semibold tracking-wider text-sm border-b border-black/5">
                       <span>No Image</span>
