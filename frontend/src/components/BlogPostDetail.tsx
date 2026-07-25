@@ -12,7 +12,7 @@ function renderInlineChildren(children?: StrapiBlockChild[]) {
           href={child.url} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="text-blue-600 hover:text-blue-500 underline transition-colors"
+          className="text-blue-600 hover:text-blue-500 underline transition-colors break-all"
         >
           {renderInlineChildren(child.children)}
         </a>
@@ -90,7 +90,7 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
           <hr className="border-slate-200 my-8" />
 
           {/* Blocksコンテンツのレンダリング */}
-          <div className="text-slate-800 leading-relaxed text-[17px] max-w-none">
+          <div className="text-slate-800 leading-relaxed text-[17px] max-w-none overflow-hidden min-w-0">
             {post.content && post.content.map((block, idx) => {
               if (block.type === 'paragraph') {
                 return (
