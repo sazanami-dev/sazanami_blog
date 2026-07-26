@@ -167,11 +167,6 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
                       width={block.image.width}
                       height={block.image.height}
                     />
-                    {block.image.alternativeText && (
-                      <span className="text-sm text-slate-500 mt-2">
-                        {block.image.alternativeText}
-                      </span>
-                    )}
                   </div>
                 );
               }
