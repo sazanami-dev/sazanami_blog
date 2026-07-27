@@ -12,7 +12,7 @@ function renderInlineChildren(children?: StrapiBlockChild[]) {
           href={child.url} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="text-blue-600 hover:text-blue-500 underline transition-colors"
+          className="text-blue-600 hover:text-blue-500 underline transition-colors break-all"
         >
           {renderInlineChildren(child.children)}
         </a>
@@ -47,8 +47,8 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
     : '未公開';
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <a href="/" className="inline-flex items-center gap-2 text-slate-500 font-semibold mb-8 hover:text-blue-600 hover:-translate-x-1 transition-all duration-200">
+    <div className="max-w-3xl mx-auto px-0 md:px-4 py-0 md:py-8">
+      <a href="/" className="inline-flex items-center gap-2 text-slate-500 font-semibold px-4 pt-6 mb-4 md:mb-8 md:px-0 hover:text-blue-600 hover:-translate-x-1 transition-all duration-200">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
@@ -56,9 +56,11 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
         記事一覧に戻る
       </a>
 
-      <article className="glass-panel overflow-hidden rounded-2xl">
+      <article className="glass-panel overflow-hidden rounded-none md:rounded-2xl">
         {coverImageUrl && (
-          <div className="h-64 md:h-96 bg-cover bg-center border-b border-black/5" style={{ backgroundImage: `url(${coverImageUrl})` }} />
+          <div className="h-80 overflow-hidden border-b border-black/5 bg-slate-50 flex items-center justify-center">
+            <img src={coverImageUrl} alt={post.title} className="max-w-full max-h-full object-contain" />
+          </div>
         )}
         
         <div className="p-6 md:p-12">
@@ -88,7 +90,7 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
           <hr className="border-slate-200 my-8" />
 
           {/* Blocksコンテンツのレンダリング */}
-          <div className="text-slate-800 leading-relaxed text-[17px] max-w-none">
+          <div className="text-slate-800 leading-relaxed text-[17px] max-w-none overflow-hidden min-w-0">
             {post.content && post.content.map((block, idx) => {
               if (block.type === 'paragraph') {
                 return (
@@ -165,11 +167,6 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
                       width={block.image.width}
                       height={block.image.height}
                     />
-                    {block.image.alternativeText && (
-                      <span className="text-sm text-slate-500 mt-2">
-                        {block.image.alternativeText}
-                      </span>
-                    )}
                   </div>
                 );
               }

@@ -1,5 +1,6 @@
 import type { StrapiPost } from '../types/strapi.types';
 import { resolveMediaUrl } from '../utils/strapi';
+import sazanamiLogo from '../assets/sazanami_dev.svg';
 
 interface BlogListProps {
   posts: StrapiPost[];
@@ -7,13 +8,21 @@ interface BlogListProps {
 }
 
 export function BlogList({ posts, strapiUrl }: BlogListProps) {
+  const logoSrc = typeof sazanamiLogo === 'string' ? sazanamiLogo : sazanamiLogo.src;
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <section className="text-center py-16 mb-8">
-        <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
-          Sazanami Blog
-        </h1>
-        <p className="text-slate-500 text-lg max-w-xl mx-auto">
+      <section className="text-center py-12 md:py-16 mb-8">
+        <div className="flex items-center justify-center gap-2 md:gap-2 mb-6">
+          <img
+            src={logoSrc}
+            alt="sazanami logo"
+            className="w-64 md:w-80 md:h-auto"
+          />
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
+            Blog
+          </h1>
+        </div>
+        <p className="text-slate-500 text-base md:text-lg max-w-4xl mx-auto px-4">
           サークルの活動、開発記録、メンバーによるブログ記事をお届けします。
         </p>
       </section>
@@ -34,7 +43,9 @@ export function BlogList({ posts, strapiUrl }: BlogListProps) {
               <a href={`/blog/${post.slug ?? post.documentId}`} key={post.id} className="block group">
                 <article className="glass-panel h-full flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-500/20 hover:shadow-xl hover:shadow-slate-200/50">
                   {coverImageUrl ? (
-                    <div className="h-44 bg-cover bg-center border-b border-black/5" style={{ backgroundImage: `url(${coverImageUrl})` }} />
+                    <div className="h-48 overflow-hidden border-b border-black/5 bg-slate-50 flex items-center justify-center">
+                      <img src={coverImageUrl} alt={post.title} className="max-w-full max-h-full object-contain" />
+                    </div>
                   ) : (
                     <div className="h-44 bg-gradient-to-br from-blue-50 to-indigo-100 flex justify-center items-center text-blue-500/30 font-semibold tracking-wider text-sm border-b border-black/5">
                       <span>No Image</span>
