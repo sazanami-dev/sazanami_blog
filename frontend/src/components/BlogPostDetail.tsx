@@ -1,5 +1,6 @@
 import type { StrapiPost, StrapiBlockChild } from '../types/strapi.types';
 import { formatDate, getPublishedDate, isUpdatedAfterPublish, resolveMediaUrl } from '../utils/strapi';
+import { AuthorBadge } from './AuthorBadge';
 
 // インライン要素（太字、斜体、コード、リンクなど）をレンダリングするヘルパー
 function renderInlineChildren(children?: StrapiBlockChild[]) {
@@ -85,6 +86,12 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
             {post.title}
           </h1>
+
+          {post.author && (
+            <div className="mb-6">
+              <AuthorBadge author={post.author} strapiUrl={strapiUrl} size="md" />
+            </div>
+          )}
 
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-8">

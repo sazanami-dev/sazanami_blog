@@ -1,6 +1,7 @@
 import type { PostSortOrder, StrapiPost } from '../types/strapi.types';
 import { formatDate, getPublishedDate, isUpdatedAfterPublish, resolveMediaUrl } from '../utils/strapi';
 import sazanamiLogo from '../assets/sazanami_dev.svg';
+import { AuthorBadge } from './AuthorBadge';
 
 interface BlogListProps {
   posts: StrapiPost[];
@@ -103,6 +104,11 @@ export function BlogList({ posts, strapiUrl, sort }: BlogListProps) {
                           <span key={tag.id} className="opacity-80">#{tag.Name}</span>
                         ))}
                       </div>
+                      {post.author && (
+                        <div className="mt-4 pt-4 border-t border-black/5">
+                          <AuthorBadge author={post.author} strapiUrl={strapiUrl} />
+                        </div>
+                      )}
                     </div>
                   </article>
                 </a>

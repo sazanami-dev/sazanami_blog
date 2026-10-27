@@ -45,32 +45,43 @@ async function fetchFromStrapi<T>(
 // 型安全なヘルパー関数
 // ============================
 
-/** ブログ記事の一覧を公開日順に取得（リレーション全展開） */
+/**
+ * 記事取得時の populate 指定。
+ * `populate=*` は1階層しか展開しないため、投稿者のアバターまで明示的に展開する。
+ */
+const POST_POPULATE = [
+    'populate[coverImage]=true',
+    'populate[category]=true',
+    'populate[tags]=true',
+    'populate[author][populate][avatar]=true',
+].join('&');
+
+/** ブログ記事の一覧を公開日順に取得（リレーション・投稿者アバター込み） */
 export async function fetchPosts(
     sort: PostSortOrder = 'newest',
 ): Promise<StrapiListResponse<StrapiPost>> {
     const direction = sort === 'oldest' ? 'asc' : 'desc';
     return fetchFromStrapi<StrapiListResponse<StrapiPost>>('posts', {
-        query: `sort[0]=originalPublishedAt:${direction}&sort[1]=publishedAt:${direction}&populate=*`,
+        query: `sort[0]=originalPublishedAt:${direction}&sort[1]=publishedAt:${direction}&${POST_POPULATE}`,
     });
 }
 
-/** slugでブログ記事を1件取得（リレーション全展開） */
+/** slugでブログ記事を1件取得（リレーション・投稿者アバター込み） */
 export async function fetchPostBySlug(
     slug: string,
 ): Promise<StrapiListResponse<StrapiPost>> {
     return fetchFromStrapi<StrapiListResponse<StrapiPost>>('posts', {
-        query: `filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`,
+        query: `filters[slug][$eq]=${encodeURIComponent(slug)}&${POST_POPULATE}`,
     });
 }
 
-/** documentIdでブログ記事を1件取得（リレーション全展開） */
+/** documentIdでブログ記事を1件取得（リレーション・投稿者アバター込み） */
 export async function fetchPostByDocumentId(
     documentId: string,
 ): Promise<StrapiSingleResponse<StrapiPost>> {
     return fetchFromStrapi<StrapiSingleResponse<StrapiPost>>(
         `posts/${encodeURIComponent(documentId)}`,
-        { query: 'populate=*' },
+        { query: POST_POPULATE },
     );
 }
 
