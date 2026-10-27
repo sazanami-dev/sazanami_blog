@@ -3,13 +3,15 @@ import Layout from '../layouts/Layout.astro';
 import { BlogList } from '../components/BlogList';
 import { fetchPosts } from '../utils/strapi';
 
-import type { StrapiPost } from '../types/strapi.types';
+import type { PostSortOrder, StrapiPost } from '../types/strapi.types';
+
+const sort: PostSortOrder = Astro.url.searchParams.get('sort') === 'oldest' ? 'oldest' : 'newest';
 
 let posts: StrapiPost[] = [];
 let error = null;
 
 try {
-  const response = await fetchPosts();
+  const response = await fetchPosts(sort);
   posts = response?.data || [];
 } catch (e) {
   console.error("Failed to fetch posts from Strapi:", e);
@@ -39,5 +41,5 @@ const strapiUrl = import.meta.env.STRAPI_PUBLIC_URL
       </div>
     </div>
   )}
-  <BlogList posts={posts} strapiUrl={strapiUrl} />
+  <BlogList posts={posts} strapiUrl={strapiUrl} sort={sort} />
 </Layout>
