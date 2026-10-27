@@ -1,6 +1,17 @@
 import type { Core } from '@strapi/strapi';
 
 const POST_UID = 'api::post.post';
+const AUTHOR_UID = 'api::author.author';
+
+/** リレーション入力に何らかの値が指定されているか（Content Manager は未選択でも { connect: [], disconnect: [] } を送る） */
+function hasRelationValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    const { connect, set } = value as { connect?: unknown[]; set?: unknown[] };
+    return (connect?.length ?? 0) > 0 || (set?.length ?? 0) > 0;
+  }
+  return true;
+}
 
 export default {
   /**
@@ -32,6 +43,31 @@ export default {
             documentId,
             data: { originalPublishedAt: new Date().toISOString() },
           });
+        }
+      }
+
+      return next();
+    });
+
+    // 管理画面で記事を作成したとき、投稿者が未選択ならログイン中の管理ユーザーに紐づく Author をセットする。
+    // API トークン経由の作成など、管理ユーザーがいないリクエストでは何もしない。
+    strapi.documents.use(async (context, next) => {
+      if (context.uid !== POST_UID || context.action !== 'create') {
+        return next();
+      }
+
+      const { data } = context.params as { data?: Record<string, unknown> };
+      const ctx = strapi.requestContext.get();
+      const adminUser = ctx?.state?.auth?.strategy?.name === 'admin' ? ctx.state.user : undefined;
+
+      if (data && adminUser && !hasRelationValue(data.author)) {
+        const author = await strapi.documents(AUTHOR_UID).findFirst({
+          filters: { adminUser: { id: adminUser.id } },
+          fields: ['documentId'],
+        });
+
+        if (author) {
+          data.author = author.documentId;
         }
       }
 
