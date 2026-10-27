@@ -48,6 +48,8 @@ export interface StrapiPost extends StrapiBaseEntity {
   coverImage: StrapiMedia | null;
   category: StrapiCategory | null;
   tags: StrapiTag[];
+  /** 初回公開日時（再公開しても変わらない） */
+  originalPublishedAt: string | null;
 }
 
 /** Category — api::category.category に対応 */

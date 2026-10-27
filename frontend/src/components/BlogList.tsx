@@ -1,5 +1,5 @@
 import type { StrapiPost } from '../types/strapi.types';
-import { resolveMediaUrl } from '../utils/strapi';
+import { formatDate, getPublishedDate, isUpdatedAfterPublish, resolveMediaUrl } from '../utils/strapi';
 import sazanamiLogo from '../assets/sazanami_dev.svg';
 
 interface BlogListProps {
@@ -35,9 +35,7 @@ export function BlogList({ posts, strapiUrl }: BlogListProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {posts.map((post) => {
             const coverImageUrl = post.coverImage ? resolveMediaUrl(post.coverImage.url, strapiUrl) : null;
-            const dateStr = post.publishedAt 
-              ? new Date(post.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
-              : '未公開';
+            const publishedDate = getPublishedDate(post);
 
             return (
               <a href={`/blog/${post.slug ?? post.documentId}`} key={post.id} className="block group">
@@ -58,7 +56,18 @@ export function BlogList({ posts, strapiUrl }: BlogListProps) {
                           {post.category.name}
                         </span>
                       )}
-                      <span>{dateStr}</span>
+                      <div className="ml-auto flex flex-col items-end gap-0.5">
+                        {publishedDate ? (
+                          <time dateTime={publishedDate}>公開 {formatDate(publishedDate)}</time>
+                        ) : (
+                          <span>未公開</span>
+                        )}
+                        {isUpdatedAfterPublish(post) && (
+                          <time dateTime={post.updatedAt} className="font-normal text-slate-400">
+                            更新 {formatDate(post.updatedAt)}
+                          </time>
+                        )}
+                      </div>
                     </div>
                     <h2 className="text-lg font-bold mb-4 line-clamp-2 text-slate-800 group-hover:text-blue-600 transition-colors duration-200">
                       {post.title}

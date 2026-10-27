@@ -1,5 +1,5 @@
 import type { StrapiPost, StrapiBlockChild } from '../types/strapi.types';
-import { resolveMediaUrl } from '../utils/strapi';
+import { formatDate, getPublishedDate, isUpdatedAfterPublish, resolveMediaUrl } from '../utils/strapi';
 
 // インライン要素（太字、斜体、コード、リンクなど）をレンダリングするヘルパー
 function renderInlineChildren(children?: StrapiBlockChild[]) {
@@ -42,9 +42,7 @@ interface BlogPostDetailProps {
 
 export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
   const coverImageUrl = post.coverImage ? resolveMediaUrl(post.coverImage.url, strapiUrl) : null;
-  const dateStr = post.publishedAt 
-    ? new Date(post.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
-    : '未公開';
+  const publishedDate = getPublishedDate(post);
 
   return (
     <div className="max-w-3xl mx-auto px-0 md:px-4 py-0 md:py-8">
@@ -64,13 +62,24 @@ export function BlogPostDetail({ post, strapiUrl }: BlogPostDetailProps) {
         )}
         
         <div className="p-6 md:p-12">
-          <div className="flex items-center gap-4 text-sm mb-6">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm mb-6">
             {post.category && (
               <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-md font-semibold">
                 {post.category.name}
               </span>
             )}
-            <span className="text-slate-500">{dateStr}</span>
+            {publishedDate ? (
+              <time dateTime={publishedDate} className="text-slate-500">
+                公開日 {formatDate(publishedDate, 'long')}
+              </time>
+            ) : (
+              <span className="text-slate-500">未公開</span>
+            )}
+            {isUpdatedAfterPublish(post) && (
+              <time dateTime={post.updatedAt} className="text-slate-400">
+                更新日 {formatDate(post.updatedAt, 'long')}
+              </time>
+            )}
           </div>
 
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
