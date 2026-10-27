@@ -52,6 +52,9 @@ export interface StrapiPost extends StrapiBaseEntity {
   originalPublishedAt: string | null;
 }
 
+/** 記事一覧の並び順 */
+export type PostSortOrder = 'newest' | 'oldest';
+
 /** Category — api::category.category に対応 */
 export interface StrapiCategory extends StrapiBaseEntity {
   name: string;

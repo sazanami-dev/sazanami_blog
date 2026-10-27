@@ -1,4 +1,5 @@
 import type {
+    PostSortOrder,
     StrapiListResponse,
     StrapiPost,
     StrapiSingleResponse,
@@ -44,10 +45,13 @@ async function fetchFromStrapi<T>(
 // 型安全なヘルパー関数
 // ============================
 
-/** ブログ記事の一覧を取得（リレーション全展開） */
-export async function fetchPosts(): Promise<StrapiListResponse<StrapiPost>> {
+/** ブログ記事の一覧を公開日順に取得（リレーション全展開） */
+export async function fetchPosts(
+    sort: PostSortOrder = 'newest',
+): Promise<StrapiListResponse<StrapiPost>> {
+    const direction = sort === 'oldest' ? 'asc' : 'desc';
     return fetchFromStrapi<StrapiListResponse<StrapiPost>>('posts', {
-        query: 'populate=*',
+        query: `sort[0]=originalPublishedAt:${direction}&sort[1]=publishedAt:${direction}&populate=*`,
     });
 }
 
