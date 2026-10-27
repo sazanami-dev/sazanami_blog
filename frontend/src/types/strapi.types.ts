@@ -48,12 +48,24 @@ export interface StrapiPost extends StrapiBaseEntity {
   coverImage: StrapiMedia | null;
   category: StrapiCategory | null;
   tags: StrapiTag[];
+  author: StrapiAuthor | null;
+  /** 初回公開日時（再公開しても変わらない） */
+  originalPublishedAt: string | null;
 }
+
+/** 記事一覧の並び順 */
+export type PostSortOrder = 'newest' | 'oldest';
 
 /** Category — api::category.category に対応 */
 export interface StrapiCategory extends StrapiBaseEntity {
   name: string;
   slug: string | null;
+}
+
+/** Author（投稿者） — api::author.author に対応 */
+export interface StrapiAuthor extends StrapiBaseEntity {
+  name: string;
+  avatar: StrapiMedia | null;
 }
 
 /** Tag — api::tag.tag に対応 */
